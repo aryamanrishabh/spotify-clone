@@ -9,30 +9,29 @@ import {
 } from "@heroicons/react/outline";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import { useRecoilState } from "recoil";
+import { playlistIdState } from "../atoms/playlistAtom";
 import useSpotify from "../hooks/useSpotify";
 
 const Sidebar = () => {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
   const [playlists, setPlaylists] = useState([]);
-
-  console.log(session);
-  console.log(spotifyApi.getAccessToken(), "token");
+  const [playlistId, setPlaylistId] = useRecoilState(playlistIdState);
 
   useEffect(() => {
     if (spotifyApi.getAccessToken()) {
-      spotifyApi.getUserPlaylists().then((data) => {
-        console.log(data);
-        setPlaylists(data.body.items);
-      });
+      spotifyApi
+        .getUserPlaylists()
+        .then((data) => setPlaylists(data.body.items));
     }
   }, [session, spotifyApi]);
 
-  console.log(playlists);
+  const handleChange = (id) => setPlaylistId(id);
 
   return (
-    <div className="overflow-y-scroll scrollbar-hide h-screen text-gray-500">
-      <div className="space-y-4  p-5 text-sm border-r border-gray-900">
+    <div className="overflow-y-scroll scrollbar-hide h-screen text-xs lg:text-sm sm:max-w-[12rem] lg:max-w-[15rem] text-gray-500 hidden md:block">
+      <div className="space-y-4  p-5 border-r border-gray-900">
         <button
           className="flex items-center space-x-2 hover:text-white"
           onClick={() => signOut()}
@@ -56,7 +55,7 @@ const Sidebar = () => {
 
       <hr className="border-t-[0.1px] mx-5 border-gray-700" />
 
-      <div className="space-y-4 p-5 text-sm border-r border-gray-900">
+      <div className="space-y-4 p-5 border-r border-gray-900">
         <button className="flex items-center space-x-2 hover:text-white">
           <PlusCircleIcon className="h-5 w-5" />
           <p>Create Playlist</p>
@@ -75,11 +74,17 @@ const Sidebar = () => {
 
       {/* Playlists */}
       <div className="p-5 space-y-4">
-        <p className="cursor-pointer hover:text-white">PlaylistName...</p>
-        <p className="cursor-pointer hover:text-white">PlaylistName...</p>
-        <p className="cursor-pointer hover:text-white">PlaylistName...</p>
-        <p className="cursor-pointer hover:text-white">PlaylistName...</p>
-        <p className="cursor-pointer hover:text-white">PlaylistName...</p>
+        {playlists?.map((playlist, i) => (
+          <p
+            onClick={() => handleChange(playlist.id)}
+            key={`${i}.playlist`}
+            className={`cursor-pointer hover:text-white ${
+              playlistId === playlist.id ? "text-white" : ""
+            }`}
+          >
+            {playlist.name}
+          </p>
+        ))}
       </div>
     </div>
   );
