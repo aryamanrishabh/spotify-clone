@@ -20,7 +20,7 @@ const Song = ({ order, track }) => {
   };
 
   return (
-    <div className="hover:backdrop-contrast-50 hover:rounded p-3">
+    <div className="hover:backdrop-contrast-50 cursor-pointer hover:rounded p-3">
       <div
         onClick={playSong}
         className="grid grid-cols-12 items-center space-x-4"

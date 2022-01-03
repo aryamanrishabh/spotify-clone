@@ -11,8 +11,9 @@ import {
   PlayIcon,
   VolumeUpIcon,
 } from "@heroicons/react/solid";
+import { debounce } from "lodash";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { currentTrackIdState, isPlayingState } from "../atoms/songAtom";
 import useSongInfo from "../hooks/useSongInfo";
@@ -53,7 +54,22 @@ const Player = () => {
     });
   };
 
-  const handleVolumeChange = () => {};
+  const handleVolumeChange = (e) => setVolume(Number(e.target.value));
+
+  const handleVolumeUp = () => {
+    if (volume < 100) setVolume(volume + 10);
+  };
+
+  const handleVolumeDown = () => {
+    if (volume > 0) setVolume(volume - 10);
+  };
+
+  const debouncedAdjustVolume = useCallback(
+    debounce((volume) => {
+      spotifyApi.setVolume(volume);
+    }, 500),
+    []
+  );
 
   useEffect(() => {
     if (spotifyApi.getAccessToken() && !currentTrackId) {
@@ -61,6 +77,12 @@ const Player = () => {
       setVolume(50);
     }
   }, [currentTrackIdState, spotifyApi, session]);
+
+  // useEffect(() => {
+  //   if (volume > 0 && volume < 100) {
+  //     debouncedAdjustVolume(volume);
+  //   }
+  // }, [volume]);
 
   return (
     <div className="h-24 bg-gradient-to-b from-black to-gray-900 text-white grid grid-cols-3 text-xs md:text-base px-2 md:px-8">
@@ -73,7 +95,7 @@ const Player = () => {
         />
         <div>
           <h3>{songInfo?.name}</h3>
-          <p>{songInfo?.artists?.[0]?.name}</p>
+          <p className="text-xs">{songInfo?.artists?.[0]?.name}</p>
         </div>
       </div>
 
@@ -92,7 +114,10 @@ const Player = () => {
 
       {/* Right */}
       <div className="flex items-center space-x-3 md:space-x-4 justify-end">
-        <VolumeDownIcon className="button" />
+        <VolumeDownIcon
+          onClick={handleVolumeDown}
+          className={volume > 0 ? "button" : "button-disabled"}
+        />
         <input
           type="range"
           min={0}
@@ -100,7 +125,10 @@ const Player = () => {
           value={volume}
           onChange={handleVolumeChange}
         />
-        <VolumeUpIcon className="button" />
+        <VolumeUpIcon
+          onClick={handleVolumeUp}
+          className={volume < 100 ? "button" : "button-disabled"}
+        />
       </div>
     </div>
   );
