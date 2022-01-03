@@ -6,12 +6,14 @@ import {
   HeartIcon,
   RssIcon,
   FingerPrintIcon,
+  UsersIcon,
 } from "@heroicons/react/outline";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { playlistIdState } from "../atoms/playlistAtom";
 import useSpotify from "../hooks/useSpotify";
+import Image from "next/image";
 
 const Sidebar = () => {
   const spotifyApi = useSpotify();
@@ -30,26 +32,20 @@ const Sidebar = () => {
   const handleChange = (id) => setPlaylistId(id);
 
   return (
-    <div className="overflow-y-scroll scrollbar-hide h-screen text-xs lg:text-sm sm:max-w-[12rem] lg:max-w-[15rem] text-gray-500 hidden md:block">
+    <div className="h-screen overflow-y-scroll scrollbar-hide text-xs lg:text-sm md:min-w-[12rem] lg:min-w-[15rem] text-gray-500 hidden md:block pb-36">
       <div className="space-y-4  p-5 border-r border-gray-900">
-        <button
-          className="flex items-center space-x-2 hover:text-white"
-          onClick={() => signOut()}
-        >
-          <FingerPrintIcon className="h-5 w-5" />
-          <p>Log Out</p>
-        </button>
+        <Image src="/spotify.svg" alt="" width="130" height="60" />
         <button className="flex items-center space-x-2 hover:text-white">
           <HomeIcon className="h-5 w-5" />
-          <p>Home</p>
+          <p className="font-bold">Home</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
           <SearchIcon className="h-5 w-5" />
-          <p>Search</p>
+          <p className="font-bold">Search</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
           <LibraryIcon className="h-5 w-5" />
-          <p>Your Library</p>
+          <p className="font-bold">Your Library</p>
         </button>
       </div>
 
@@ -58,32 +54,36 @@ const Sidebar = () => {
       <div className="space-y-4 p-5 border-r border-gray-900">
         <button className="flex items-center space-x-2 hover:text-white">
           <PlusCircleIcon className="h-5 w-5" />
-          <p>Create Playlist</p>
+          <p className="font-bold">Create Playlist</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
           <HeartIcon className="h-5 w-5" />
-          <p>Liked Songs</p>
+          <p className="font-bold">Liked Songs</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
           <RssIcon className="h-5 w-5" />
-          <p>Your Episodes</p>
+          <p className="font-bold">Your Episodes</p>
         </button>
       </div>
 
       <hr className="border-t-[0.1px] mx-5 border-gray-700" />
 
-      {/* Playlists */}
       <div className="p-5 space-y-4">
         {playlists?.map((playlist, i) => (
-          <p
-            onClick={() => handleChange(playlist.id)}
+          <div
             key={`${i}.playlist`}
-            className={`cursor-pointer hover:text-white ${
-              playlistId === playlist.id ? "text-white" : ""
-            }`}
+            className="flex justify-between items-center"
           >
-            {playlist.name}
-          </p>
+            <p
+              onClick={() => handleChange(playlist.id)}
+              className={`cursor-pointer hover:text-white truncate ${
+                playlistId === playlist.id ? "text-white" : ""
+              }`}
+            >
+              {playlist.name}
+            </p>
+            {playlist.collaborative && <UsersIcon className="w-3 h-3" />}
+          </div>
         ))}
       </div>
     </div>
